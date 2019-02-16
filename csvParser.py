@@ -16,14 +16,40 @@ d = dfile.readlines()
 
 lat = d[2::5]
 lon = d[3::5]
-time = d[4::5]
-for i in range(len(lat)):
-	lat[i] = float(lat[i][18:26])*10**-6
-	lon[i] = float(lon[i][19:29])*10**-7
-	time[i] = float(time[i][20:33])*10**-3
+t = d[4::5]
+
+def getVal(data):
+	for i in range(len(data)):
+
+		val = ''
+		number = False
+
+		j = 0
+		while True:
+
+			if data[i][j] == ',':
+
+				data[i] = float(val) * 10**-7
+				break
+			
+			while not number:
+
+				j += 1
+				if data[i][j] == ':':
+
+					j += 1
+					number = True
+
+			val += data[i][j]
+			j += 1
+
+getVal(lat)
+getVal(lon)
+for i in range(len(t)):
+	t[i] = float(t[i][20:33]) * 10**-3
 
 df = pd.DataFrame()
-df['time'] = time
+df['time'] = t
 df['lat'] = lat
 df['lon'] = lon
 print(df)
