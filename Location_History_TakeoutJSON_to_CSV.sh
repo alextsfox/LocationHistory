@@ -1,9 +1,9 @@
 #!usr/bin/bash
 
 timestamp=02142019
-RawJSON=02142019/location_history_02142019.json
-filteredJSON=02142019/filtered_locations_timestamped_02142019.json
+RawJSON=$timestamp/location_history_$timestamp.json
+filteredJSON=$timestamp/filtered_locations_timestamped_$timestamp.json
 
-#`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
+`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
 
 python3 csvParser.py $filteredJSON $timestamp
