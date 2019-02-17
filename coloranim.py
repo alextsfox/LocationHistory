@@ -1,3 +1,5 @@
+#takes a csv file as input, outputs a movie.
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
@@ -7,6 +9,7 @@ from datetime import datetime
 # get csv file
 parser = argparse.ArgumentParser()
 parser.add_argument('fileIn', help='location history CSV file')
+parser.add_argument('fileOut', help='out file path')
 args = parser.parse_args()
 
 # load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
@@ -33,7 +36,7 @@ plt.ylim(35,45)
 plt.clim(colorData[0], colorData[-1])
 plt.axis('off')
 
-print('Ideal Timestep: ', (colorData[-1] - colorData[0])/3600)
+#print('Ideal Timestep: ', (colorData[-1] - colorData[0])/3600)
 #The number of points per frame by timestamp so that in the end we have a 60 second movie
 def getPtsThisFrame(i):
 
@@ -50,7 +53,7 @@ def getPtsThisFrame(i):
 		except IndexError as err:
 			break
 
-	print(i,len(colorData), 'IndexStep',indexStep, 'TrueTimeStep', colorData[i+indexStep]-colorData[i], 'TimeStepRemainder',timestep)
+	#print(i,len(colorData), 'IndexStep',indexStep, 'TrueTimeStep', colorData[i+indexStep]-colorData[i], 'TimeStepRemainder',timestep)
 
 	nextIndex = i+indexStep
 	# return the proper number of frames to advance to
@@ -84,6 +87,5 @@ numFrames = len(colorData)
 print('starting animation...')
 animation = anim.FuncAnimation(fig, animate, init_func=init,frames=numFrames, interval=interval, blit=True)#True)
 print('saving...')
-#animation.save('animtest.mp4', fps=500, extra_args=['-vcodec', 'libx264'])
+animation.save(args.fileOut, fps=500, extra_args=['-vcodec', 'libx264'])
 print('saved')
-plt.show()
