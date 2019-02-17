@@ -3,43 +3,52 @@ import matplotlib.animation as anim
 import numpy as np
 import argparse
 
+# get csv file
 parser = argparse.ArgumentParser()
 parser.add_argument('fileIn', help='location history CSV file')
 args = parser.parse_args()
 
-locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)
-colorData = locHist[:,0::-1]
-lat, lon = locHist[:,2::-1], locHist[:,3::-1]
+# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
+locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-1]
+colorData = np.array([(x, 0, 1-x) for x in locHist[:,0]])
+lat = locHist[:,2]
+lon = locHist[:,3]
 
 numFrames = len(colorData)
 
+# creating figure object
 fig = plt.figure()
-# ax = plt.axes(xlim=(-100.,-68.), ylim=(35.,50.))
-# line, = ax.plot([],[], linestyle='None', marker='o', markersize=2, c=colorData[0])
-scat = plt.scatter([],[], s=2 , c=[(0,0,0)])
+scat = plt.scatter([],[], s=10)#, c=[], cmap='viridis')
 
+# initial frame function is an empty colorbar and empty point array
 def init():
 
-	scat.set_array([],[],[])
+	scat.set_offsets([])
+	#scat.set_array([])
 
 	return scat,
 
-def animate(i, X, Y, T):
+# animation function progressively adds points by plotting slices [:i] iteratively.
+def animate(i, X=lon, Y=lat, T=colorData):
 
-	X = X[:i]
-	Y = Y[:i]
-	T = T[:i]
-	scat.set_array(T)
-	scat.set_offsets(X,Y)
+	# set_offsets needs an nx2 array, so we use hstack to rotate and stack our arrays.
+	#print(len(X))
+	XY = np.hstack((X[:i,np.newaxis], Y[:i, np.newaxis]))
+	print(XY)
+	print(XY.shape)
+	scat.set_offsets(XY)
+	#scat.set_array(T)
 
 	return scat,
 
-interval = 20/numFrames
+# frame speed, ms
+interval = 10
 
-print(interval)
-animation = anim.FuncAnimation(fig, animate, 
-							   init_func=init, frames=numFrames, interval=interval, blit=True,
-							   fargs=(lon, lat, colorData))
+#print(interval)
+plt.xlim(-100,-65)
+plt.ylim(35,45)
+animation = anim.FuncAnimation(fig, animate, init_func=init,frames=numFrames, interval=interval, blit=True,)
+
 plt.show()
 
 
