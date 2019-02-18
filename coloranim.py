@@ -63,11 +63,12 @@ def update_progress(progress):
     sys.stdout.write(text)
     sys.stdout.flush()
 
-# time to advance each frame
+# time to advance each frame for timewise normalization
 def getPtsThisFrame(i):
 	
 	timestep = (colorData[-1] - colorData[0])/10800
-	# count frames ahead until we see that the timestep is below the threshold
+	
+	# count datapoints ahead until we see that the number of points we've advanced through exceeds the timestep 
 	indexStep = 0#i
 	while timestep > 0:
 		timestep -= (colorData[i + indexStep+1] - colorData[i + indexStep])
@@ -80,7 +81,7 @@ def getPtsThisFrame(i):
 
 k=0
 l = 0
-# calculate the number of frames we'll need to animate
+# calculate the number of frames we'll need
 def mockAnimate(i, X=lon, Y=lat, T=colorData):
 	global k
 	global l
@@ -109,26 +110,30 @@ for m in range(len(colorData)):
 	if mockAnimate(m) is not None:
 		numFrames = mockAnimate(m)
 
+# actual animation function
 def animate(i, X=lon, Y=lat, T=colorData):
 
 	
 	try:
 		global j
+
+		# find what the next frame's index is
 		nextIndex = getPtsThisFrame(j)
 		j = nextIndex
 
 		# set_offsets needs an nx2 array, so we use hstack to rotate and stack our arrays.
 		XY = np.hstack((X[:nextIndex,np.newaxis], Y[:nextIndex, np.newaxis]))
 		scat.set_offsets(XY)
-		# who knows why we need this?
+
+		# who knows why we need this np.ravel thing? I don't.
 		scat.set_array(np.ravel(T[:nextIndex]))
 
+		# our progress bar
 		update_progress(i/numFrames)
 	
-	# sneaky when we've run out the end of our data, trigger the save and exit condition.
+	# gets rid of issues with running off the end of our dataset
 	except IndexError as err:
 		pass
-		#rint('stuck at index', i)
 
 	return scat,
 

@@ -1,9 +1,22 @@
 #!usr/bin/bash
 
-timestamp=02142019
-RawJSON=02142019/location_history_02142019.json
-filteredJSON=02142019/filtered_locations_timestamped_02142019.json
+#directory containing the google takeout .json file (change me!)
+dir=02142019
 
-`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
+#direct filepath to the  google takeout .json file (change me!)
+RawJSON=$dir/location_history_$dir.json
 
-python3 csvParser.py $filteredJSON $timestamp
+#preferred output filename for the filtered .json file (change me!)
+filteredJSON=$dir/filtered_locations_dired_$dir.json
+
+echo 'Filtering location history archive...'
+
+`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, dirMs}]" > $filteredJSON`
+
+echo 'Converting archive to csv...'
+
+python3 csvParser.py $filteredJSON $dir
+
+echo 'Making your movie, this may take a while...'
+
+python3 coloranim.py $dir/FilteredLocationsFull_.csv $dir/MyTravels_.mp4
