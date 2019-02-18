@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 from datetime import datetime
 import sys
+from time import time
 
 # get csv file
 parser = argparse.ArgumentParser()
@@ -142,5 +143,9 @@ interval = 0
 print('starting animation...')
 animation = anim.FuncAnimation(fig, animate, init_func=init,frames=numFrames, interval=interval, blit=True)#True)
 print('animating...')
+t0 = time()
 animation.save(args.fileOut, fps=500, extra_args=['-vcodec', 'libx264'])
+t1 = time()
+t2 = (t1-t0)/3600
+print('I took {} hours to make this animation.'.format(t2))
 print('successfully saved as', args.fileOut)
