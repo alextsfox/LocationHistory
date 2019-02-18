@@ -27,7 +27,7 @@ lat = locHist[:,2]
 lon = locHist[:,3]
 
 # creating figure object
-fig = plt.figure(figsize=(30,15))
+fig = plt.figure(figsize=(30,20))
 
 # for some reason, when we give it an empty array, it spazzes out, so we give it empty slices.
 scat = plt.scatter(lon[:1],lat[:1], c=colorData[:1], s=2, cmap='viridis_r')
