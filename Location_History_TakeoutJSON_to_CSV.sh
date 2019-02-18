@@ -4,10 +4,10 @@
 dir=02142019
 
 #direct filepath to the  google takeout .json file (change me!)
-RawJSON=$dir/location_history_$dir.json
+RawJSON=$dir/location_history_02142019.json
 
 #preferred output filename for the filtered .json file (change me!)
-filteredJSON=$dir/filtered_locations_dired_$dir.json
+filteredJSON=$dir/filtered_locations_02142019.json
 
 echo 'Filtering location history archive...'
 
@@ -19,4 +19,4 @@ python3 csvParser.py $filteredJSON $dir
 
 echo 'Making your movie, this may take a while...'
 
-python3 coloranim.py $dir/FilteredLocationsFull_.csv $dir/MyTravels_.mp4
+python3 coloranim.py $dir/FilteredLocationsFull.csv $dir/MyTravels_.mp4
