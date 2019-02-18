@@ -1,7 +1,7 @@
 #!usr/bin/bash
 
 #directory containing the google takeout .json file (change me!)
-dir=LocDir
+dir=LocDir02142019
 
 #location of the google takeout .json file (change me!)
 RawJSON=LocDir/location_history_02142019.json
