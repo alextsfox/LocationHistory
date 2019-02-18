@@ -1,22 +1,25 @@
 #!usr/bin/bash
 
 #directory containing the google takeout .json file (change me!)
-dir=02142019
+dir=LocDir
 
-#direct filepath to the  google takeout .json file (change me!)
-RawJSON=$dir/location_history_02142019.json
+#location of the google takeout .json file (change me!)
+RawJSON=LocDir/location_history_02142019.json
 
-#preferred output filename for the filtered .json file (change me!)
-filteredJSON=$dir/filtered_locations_02142019.json
+
+filteredJSON=$dir/filtered_locations_.json
 
 echo 'Filtering location history archive...'
 
-`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, dirMs}]" > $filteredJSON`
+`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
 
 echo 'Converting archive to csv...'
 
 python3 csvParser.py $filteredJSON $dir
 
-echo 'Making your movie, this may take a while...'
+echo 'Making your movie, this will take a long time...'
 
-python3 coloranim.py $dir/FilteredLocationsFull.csv $dir/MyTravels_.mp4
+#select the resoltuion (choose between Ultra Low Res: '05k', Low Res: '15k', and Full Res: 'Full')
+Resolution=05k
+
+python3 coloranim.py $dir/FilteredLocations$Resolution.csv $dir/MyTravels_$Resolution.mp4
