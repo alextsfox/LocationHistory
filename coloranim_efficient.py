@@ -1,5 +1,4 @@
 # takes a csv file given by csvParser.py, makes a movie of it (or rather, series of movies)
-
 import matplotlib.pyplot as plt
 import matplotlib.animation as make_animate
 import numpy as np
