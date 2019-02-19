@@ -169,8 +169,8 @@ if __name__ == '__main__':
 	plt.plot(range(len(t_diff_smooth)),t_diff_smooth)
 	plt.xlabel('frame number')
 	plt.ylabel('time per frame')
-	plt.xlim(0,len(t_diff_smooth)+1)
-	plt.ylim(0,max(t_diff)+1)
+	plt.xlim(0,len(t_diff_smooth))
+	plt.ylim(0,max(t_diff_smooth)*1.1)
 	plt.show()
 
 
