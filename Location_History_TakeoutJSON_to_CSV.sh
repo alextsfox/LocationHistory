@@ -24,4 +24,4 @@ python3 colorImage.py $dir/FilteredLocations$Resolution.csv $dir/figs/MyTravels_
 
 echo 'Making your movie, this will take a long time...'
 
-python3 coloranim.py $dir/FilteredLocations$Resolution.csv $dir/figs/MyTravels_$Resolution.mp4
+python3 coloranim_efficient.py $dir/FilteredLocations$Resolution.csv $dir/figs/MyTravels_$Resolution.mp4

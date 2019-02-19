@@ -139,6 +139,7 @@ if __name__ == '__main__':
 
 	# create animation
 	t=[] #for tracking render time
+
 	anim = make_animate.FuncAnimation(
 		fig, 
 		animate, 
@@ -153,20 +154,21 @@ if __name__ == '__main__':
 	# plt.show()
 	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
+	plt.clf()
+	plt.close('all')
 
 	t_diff=[]
 	for i in range(1,len(t)):
 		t_diff.append(t[i]-t[i-1])
-	t_diff_smooth = []
-	for i in range(len(t_diff) - 9):
-		t_diff_smooth.append(np.mean(t_diff[i:i+8]))
-	print(t_diff_smooth)
 
-	plt.clf()
+	t_diff_smooth = []
+	for i in range(len(t_diff) - 21):
+		t_diff_smooth.append(np.mean(t_diff[i:i+20]))
+
 	fig = plt.figure()
 	plt.plot(range(len(t_diff_smooth)),t_diff_smooth)
-	plt.xlabel('time per frame')
-	plt.ylabel('frame number')
+	plt.xlabel('frame number')
+	plt.ylabel('time per frame')
 	plt.xlim(0,len(t_diff_smooth)+1)
 	plt.ylim(0,max(t_diff)+1)
 	plt.show()
