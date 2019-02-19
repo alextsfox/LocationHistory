@@ -131,8 +131,8 @@ if __name__ == '__main__':
 	plt.clim(colorData[0], colorData[-1])
 	plt.axis('off')
 
-	# approx. 1 frame per day
-	timestep = 1/365.25
+	# approx. 3 frames per day
+	timestep = 3/365.25
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep, colorData)
 	numFrames = len(frames)
