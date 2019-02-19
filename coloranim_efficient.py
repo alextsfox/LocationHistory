@@ -1,11 +1,12 @@
 # takes a csv file given by csvParser.py, makes a movie of it (or rather, series of movies)
 
 import matplotlib.pyplot as plt
-import matplotlib.animation as animate
+import matplotlib.animation as make_animate
 import numpy as np
 import argparse
 from datetime import datetime
 import sys
+from time import time as get_time
 
 # take a unix timestamp in seconds, convert to a decimal of a year
 def get_decimal_year(timestamp):
@@ -18,8 +19,6 @@ def get_decimal_year(timestamp):
 
 # a nice looking progress bar
 def update_progress(progress):
-	# progress: float or int
-
     barLength = 63 # Modify this to change the length of the progress bar
     status = ""
     if isinstance(progress, int):
@@ -40,7 +39,7 @@ def update_progress(progress):
 
 # this function performs normalizes the frame length by timestamp
 # otherwise, each frame would span an arbitrary amount of time.
-def get_next_index(i, timestep):
+def get_next_index(i, timestep, colorData):
 	# i is an iterable integer
 	# needs to output an index value to jump to
 	
@@ -48,28 +47,31 @@ def get_next_index(i, timestep):
 	di = 0
 	while timestep > 0:
 		timestep -= (colorData[i+di + 1] - colorData[i+di])
-		indexStep += 1
+		di += 1
 
-	nextIndex = i+indexStep
+	nextIndex = i + di
 	# return the proper number of frames to advance to
 	return nextIndex
 
 # creates an array of the data point indexes to stop each frame at
-def get_frame_list(dataArray, timestep):
+def get_frame_list(dataArray, timestep, colorData):
 	# data is an nxn array
 	# timestep is a float
 
 	# create a list of indexes to slice frames at
 	indexList = []
 	nextIndex = 0
-	while nextIndex < len(data):
+	while nextIndex < len(dataArray) - 1:
 		indexList.append(nextIndex)
-		nextIndex = get_next_index(nextIndex, timestep)
+		try:
+			nextIndex = get_next_index(nextIndex, timestep, colorData)
+		except IndexError as err:
+			break
 
 	# initialize and fill out an n x m x 3 array where each entry contains data for a frame
 	frames = []
-		for i in indexList[:-1]:
-		frames.append(dataArray[i]:dataArray[i+1])
+	for i in range(len(indexList) - 1):
+		frames.append(dataArray[indexList[i]:indexList[i+1]])
 
 	# frames[i] give all the data points needed to create a frame
 	return frames
@@ -80,29 +82,39 @@ def init():
 
 	return scat,
 
-def animate(i, dataArray):
+def animate(i, dataArray,t):
 
-	scat.set_offsets(dataArray[:i,:2:-1])
+	scat.set_offsets(dataArray[:i,1::-1])
 	scat.set_array(np.ravel(dataArray[:i,2]))
 	# scat.set_array(dataArray[:i,2])
 	update_progress(i/numFrames)
+	t.append(get_time())
+	
 
 	return scat,
 
-def main():
+if __name__ == '__main__':
+	
+	# get csv file and outpath
+	parser = argparse.ArgumentParser()
+	parser.add_argument('fileIn', help='location history CSV file')
+	parser.add_argument('fileOut', help='out file path')
+	args = parser.parse_args()
+
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
 	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-1]
+	dateData = locHist[:,1]
 	lat = locHist[:,2]
 	lon = locHist[:,3]
 	start_date = get_decimal_year(dateData[0])
 	colorData = ((dateData-dateData[0]))/3.1536E7 + start_date
 
 	# organize data into an nx3 array, where each row is timestamped
-	dataArray = np.hstack(
-		lat[:,np.newaxis],
-		lon[:,np.newaxis],
-		colorData[:,np.newaxis]
-		)
+	dataArray = np.hstack((
+			lat[:,np.newaxis],
+			lon[:,np.newaxis],
+			colorData[:,np.newaxis]
+		))
 						  			
 	# figure framework, starting with an empty plot
 	fig = plt.figure(figsize=(30,20))
@@ -112,7 +124,7 @@ def main():
 		c=dataArray[:1,2], 
 		s=2, 
 		cmap='viridis_r')
-
+	
 	#configure figure style, restrict to CONUS
 	plt.xlim(-125,-65)
 	plt.ylim(25,50)
@@ -122,29 +134,41 @@ def main():
 	# approx. 1 frame per day
 	timestep = 1/365.25
 	# each element of frames is the datapoints to make up a given frame
-	frames = get_frame_list(dataArray, timestep)
+	frames = get_frame_list(dataArray, timestep, colorData)
 	numFrames = len(frames)
 
 	# create animation
-	anim = animate.FuncAnimation(
+	t=[] #for tracking render time
+	anim = make_animate.FuncAnimation(
 		fig, 
 		animate, 
-		fargs=(dataArray),
+		fargs=(dataArray,t,),
 		init_func=init,
 		frames=numFrames,
 		interval=0,
 		blit=True)
 
-	plt.show()
-	#anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
-	print('succesfully saved as', args.fileOut)
 
-if __name__ == '__main__':
-	
-	# get csv file and outpath
-	parser = argparse.ArgumentParser()
-	parser.add_argument('fileIn', help='location history CSV file')
-	parser.add_argument('fileOut', help='out file path')
-	args = parser.parse_args()
+
+	# plt.show()
+	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	print('\nsuccesfully saved as', args.fileOut)
+
+	t_diff=[]
+	for i in range(1,len(t)):
+		t_diff.append(t[i]-t[i-1])
+	t_diff_smooth = []
+	for i in range(len(t_diff) - 9):
+		t_diff_smooth.append(np.mean(t_diff[i:i+8]))
+	print(t_diff_smooth)
+
+	plt.clf()
+	fig = plt.figure()
+	plt.plot(range(len(t_diff_smooth)),t_diff_smooth)
+	plt.xlabel('time per frame')
+	plt.ylabel('frame number')
+	plt.xlim(0,len(t_diff_smooth)+1)
+	plt.ylim(0,max(t_diff)+1)
+	plt.show()
 
 
