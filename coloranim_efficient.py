@@ -85,7 +85,7 @@ def init():
 def animate(i, frames,t):
 	# print(frames[i][1::-1])
 	scat.set_offsets(frames[i][:,1::-1])
-	scat.set_array(np.ravel(frames[i][2]))
+	scat.set_array(np.ravel(frames[i][:,2]))
 	# scat.set_array(dataArray[:i,2])
 	update_progress(i/numFrames)
 	t.append(get_time())
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 		dataArray[:1,1],
 		dataArray[:1,0], 
 		c=dataArray[:1,2], 
-		s=20, 
+		s=2, 
 		cmap='viridis_r')
 	
 	#configure figure style, restrict to CONUS
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 	plt.axis('off')
 
 	# approx. 1 frame per day
-	timestep = 1/365.25
+	timestep = 1/(3*365.25)
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep, colorData)
 	numFrames = len(frames)
@@ -168,12 +168,18 @@ if __name__ == '__main__':
 	for i in range(len(t_diff) - 21):
 		t_diff_smooth.append(np.mean(t_diff[i:i+20]))
 
-	fig = plt.figure()
-	plt.plot(range(len(t_diff_smooth)),t_diff_smooth)
-	plt.xlabel('frame number')
-	plt.ylabel('time per frame')
-	plt.xlim(0,len(t_diff_smooth))
-	plt.ylim(0,max(t_diff_smooth)*1.1)
+	fig2, ax1 = plt.subplots()
+	ax1.plot(range(len(t)), t, 'b-')
+	ax1.set_xlabel('number of frames')
+	# Make the y-axis label, ticks and tick labels match the line color.
+	ax1.set_ylabel('total time', color='b')
+	ax1.tick_params('y', colors='b')
+
+	ax2 = ax1.twinx()
+	ax2.plot(range(len(t_diff_smooth)),t_diff_smooth, 'r-')
+	ax2.set_ylabel('time per frame', color='r')
+	ax2.tick_params('y', colors='r')
+	fig2.tight_layout()
 	plt.show()
 
 
