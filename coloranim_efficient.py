@@ -1,7 +1,7 @@
 # takes a csv file given by csvParser.py, makes a movie of it (or rather, series of movies)
 
 import matplotlib.pyplot as plt
-import matplotlib.animation as anim
+import matplotlib.animation as animate
 import numpy as np
 import argparse
 from datetime import datetime
@@ -74,12 +74,19 @@ def get_frame_list(dataArray, timestep):
 	# frames[i] give all the data points needed to create a frame
 	return frames
 
+def init():
+	scat.set_offsets([])
+	scat.set_array([])
+
+	return scat,
+
 def animate(i, dataArray):
 
 	scat.set_offsets(dataArray[:i,:2:-1])
-	scat.set_array(dataArray[:i,2])
+	scat.set_array(np.ravel(dataArray[:i,2]))
+	# scat.set_array(dataArray[:i,2])
 	update_progress(i/numFrames)
-	
+
 	return scat,
 
 def main():
@@ -112,11 +119,25 @@ def main():
 	plt.clim(colorData[0], colorData[-1])
 	plt.axis('off')
 
-	# 60s @ 30 fps = 10800 frames (approx)
-	timestep = (colorData[-1] - colorData[0])/10800
+	# approx. 1 frame per day
+	timestep = 1/365.25
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep)
 	numFrames = len(frames)
+
+	# create animation
+	anim = animate.FuncAnimation(
+		fig, 
+		animate, 
+		fargs=(dataArray),
+		init_func=init,
+		frames=numFrames,
+		interval=0,
+		blit=True)
+
+	plt.show()
+	#anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	print('succesfully saved as', args.fileOut)
 
 if __name__ == '__main__':
 	
