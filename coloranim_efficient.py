@@ -71,7 +71,7 @@ def get_frame_list(dataArray, timestep, colorData):
 	# initialize and fill out an n x m x 3 array where each entry contains data for a frame
 	frames = []
 	for i in range(len(indexList) - 1):
-		frames.append(dataArray[indexList[i]:indexList[i+1]])
+		frames.append(dataArray[:indexList[i+1]])
 
 	# frames[i] give all the data points needed to create a frame
 	return frames
@@ -82,13 +82,14 @@ def init():
 
 	return scat,
 
-def animate(i, dataArray,t):
-
-	scat.set_offsets(dataArray[:i,1::-1])
-	scat.set_array(np.ravel(dataArray[:i,2]))
+def animate(i, frames,t):
+	# print(frames[i][1::-1])
+	scat.set_offsets(frames[i][:,1::-1])
+	scat.set_array(np.ravel(frames[i][2]))
 	# scat.set_array(dataArray[:i,2])
 	update_progress(i/numFrames)
 	t.append(get_time())
+	# print(frames[:i,:].shape)
 	
 
 	return scat,
@@ -122,20 +123,24 @@ if __name__ == '__main__':
 		dataArray[:1,1],
 		dataArray[:1,0], 
 		c=dataArray[:1,2], 
-		s=2, 
+		s=20, 
 		cmap='viridis_r')
 	
 	#configure figure style, restrict to CONUS
 	plt.xlim(-125,-65)
-	plt.ylim(25,50)
+	plt.ylim(30,50)
 	plt.clim(colorData[0], colorData[-1])
 	plt.axis('off')
 
-	# approx. 3 frames per day
-	timestep = 3/365.25
+	# approx. 1 frame per day
+	timestep = 1/365.25
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep, colorData)
 	numFrames = len(frames)
+
+	# print(frames[2][:,1::-1])
+	# print(frames[1][:,1::-1])
+	# #print(frames[1][:,1::-1])
 
 	# create animation
 	t=[] #for tracking render time
@@ -143,7 +148,7 @@ if __name__ == '__main__':
 	anim = make_animate.FuncAnimation(
 		fig, 
 		animate, 
-		fargs=(dataArray,t,),
+		fargs=(frames,t),
 		init_func=init,
 		frames=numFrames,
 		interval=0,
@@ -154,8 +159,6 @@ if __name__ == '__main__':
 	# plt.show()
 	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
-	plt.clf()
-	plt.close('all')
 
 	t_diff=[]
 	for i in range(1,len(t)):
