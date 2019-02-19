@@ -7,7 +7,6 @@ import numpy as np
 import argparse
 from datetime import datetime
 import sys
-from time import time
 
 # get csv file
 parser = argparse.ArgumentParser()
@@ -139,13 +138,19 @@ def animate(i, X=lon, Y=lat, T=colorData):
 	return scat,
 
 # frame speed, ms
-interval = 0
+
 print('starting animation...')
-animation = anim.FuncAnimation(fig, animate, init_func=init,frames=numFrames, interval=interval, blit=True)#True)
-print('animating...')
-t0 = time()
-animation.save(args.fileOut, fps=500, extra_args=['-vcodec', 'libx264'])
-t1 = time()
-t2 = (t1-t0)/3600
-print('I took {} hours to make this animation.'.format(t2))
-print('successfully saved as', args.fileOut)
+
+# have to make movie in slices
+counter = 0
+for movieSlice in range(1, numFrames+1, (numFrames+1)//10):
+	interval = 0
+	animation = anim.FuncAnimation(fig, animate, init_func=init,frames=numFrames, interval=interval, blit=True)#True)
+	print('animating...')
+	animation.save(args.fileOut, fps=numFrames//60, extra_args=['-vcodec', 'libx264'])
+
+	print('I took {} hours to make this animation.'.format(t2))
+	print('successfully saved as', args.fileOut)
+
+	counter += 1
+
