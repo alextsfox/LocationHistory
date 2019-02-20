@@ -75,40 +75,51 @@ def get_frame_list(dataArray, timestep, colorData):
 	# frames[i] give all the data points needed to create a frame
 	return frames
 
+# initialize an empty plot
 def init():
 	scat.set_offsets([])
 	scat.set_array([])
+	scat.set_sizes([])
 
 	return scat,
 
+# animation function called by FuncAnimation
 def animate(i, frames,t):
-	# print(frames[i][1::-1])
+	# iterable i
+	# n x m x 3 array frames
+	# float t
+
 	scat.set_offsets(frames[i][:,1::-1])
 	scat.set_array(np.ravel(frames[i][:,2]))
+	scat.set_sizes(np.ravel(frames[i][:,3]))
 	# scat.set_array(dataArray[:i,2])
 	update_progress(i/numFrames)
 	t.append(get_time())
 	# print(frames[:i,:].shape)
 
-# sets the 5 most recent frames to black, all others to grey
+	return scat,
+
+# sets the 5 most recent frames to black and large, all others to grey
 def set_grey_frames(frames):
 	# n x m x 3 array of frames
 
-	for i in range(len(frames)):
-		if i<=5:
-			frames[i][:,2] = 1
+	newFrames = np.copy(frames)
+
+	for i in range(len(newFrames)):
+		if i<5:
+			newFrames[i][:,2] = 1
+			newFrames[i][:,3] = 10
 		else:
-			frames[i][:,2] = 0.75
+			newFrames[i][:,2] = 0.5
 
-	# 5 most recent frames set to black, all others are a slightly dim grey
-	for i in range(5,len(frames)):
-		frameIndexSpan = len(frames[i]) - len(frames[i-5])
-		frames[i][len(frames)-frameIndexSpan-1:,2] = 1
+	# 5 most recent frames set to black and large, all others are a slightly dim grey
+	for i in range(5,len(newFrames)):
+		frameIndexSpan = len(newFrames[i]) - len(newFrames[i-5])
+		newFrames[i][-frameIndexSpan:,2] = 1
+		newFrames[i][-frameIndexSpan:,3] = 10
+		newFrames[i][:-frameIndexSpan:,2] = 0.75
 
-	return frames
-	
-
-	return scat,
+	return newFrames
 
 if __name__ == '__main__':
 	
@@ -127,10 +138,12 @@ if __name__ == '__main__':
 	colorData = ((dateData-dateData[0]))/3.1536E7 + start_date
 
 	# organize data into an nx3 array, where each row is timestamped
+	# fourth column is the size column
 	dataArray = np.hstack((
 			lat[:,np.newaxis],
 			lon[:,np.newaxis],
-			colorData[:,np.newaxis]
+			colorData[:,np.newaxis],
+			2*np.ones_like(colorData[:,np.newaxis])
 		))
 						  			
 	# figure framework, starting with an empty plot
@@ -139,7 +152,7 @@ if __name__ == '__main__':
 		dataArray[:1,1],
 		dataArray[:1,0], 
 		c=dataArray[:1,2], 
-		s=2, 
+		s=dataArray[:1,3], 
 		cmap='Greys')
 	
 	#configure figure style, restrict to CONUS
@@ -153,13 +166,8 @@ if __name__ == '__main__':
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep, colorData)
 	frames = set_grey_frames(frames)
+	plt.clim(0,1)
 	numFrames = len(frames)
-
-
-
-	# print(frames[2][:,1::-1])
-	# print(frames[1][:,1::-1])
-	# #print(frames[1][:,1::-1])
 
 	# create animation
 	t=[] #for tracking render time
@@ -176,7 +184,7 @@ if __name__ == '__main__':
 
 
 	# plt.show()
-	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	anim.save(args.fileOut, fps=60, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 
 	t_diff=[]
