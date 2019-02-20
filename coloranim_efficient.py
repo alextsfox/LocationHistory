@@ -68,12 +68,18 @@ def get_frame_list(dataArray, timestep, colorData):
 			break
 
 	# initialize and fill out an n x m x 3 array where each entry contains data for a frame
-	frames = []
+	frames = np.empty( (len(indexList)-1, len(dataArray), len(dataArray[0])) )
+	frames[:] = -9999
+	
+	frames = np.delete(frames, np.s_[-2:], axis=1)
+	
 	for i in range(len(indexList) - 1):
-		frames.append(dataArray[:indexList[i+1]])
+		frames[i,:indexList[i+1]] = dataArray[:indexList[i+1]]
+
+	
 
 	# frames[i] give all the data points needed to create a frame
-	return frames
+	return frames, indexList
 
 # initialize an empty plot
 def init():
@@ -84,14 +90,14 @@ def init():
 	return scat,
 
 # animation function called by FuncAnimation
-def animate(i, frames,t):
+def animate(i, frames,t, indexList):
 	# iterable i
 	# n x m x 3 array frames
 	# float t
 
-	scat.set_offsets(frames[i][:,1::-1])
-	scat.set_array(np.ravel(frames[i][:,2]))
-	scat.set_sizes(np.ravel(frames[i][:,3]))
+	scat.set_offsets(frames[i,:indexList[i],1::-1])
+	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
+	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
 	# scat.set_array(dataArray[:i,2])
 	#update_progress(i/numFrames)
 	t.append(get_time())
@@ -100,46 +106,19 @@ def animate(i, frames,t):
 	return scat,
 
 # sets the 30 most recent frames to black and large, all others to grey
-def set_grey_frames(frames):
+def set_grey_frames(frames, indexList):
 	# n x m x 3 array of frames
 
-	newFrames = frames.copy()
-
-	for i in range(30):
-		# print('<30, changing')
-		newFrames[i][:,2] = 1
-		newFrames[i][:,3] = 100
-		# print(newFrames[i][:,2:])
-			
-	#print(newFrames[2])
+	newFrames = np.copy(frames)
+	newFrames[:,:,2:] = [1,10]
 
 	# 30 most recent frames set to black and large, all others are a slightly dim grey
 	for i in range(30,len(newFrames)):
-		newFrames[i][:,2] = 0.3
-		newFrames[i][:,3] = 2
 
-		# if i<50:
-		# 	print('step1, everything should be .3,2\n', newFrames[i][:,2:])
-
-		frameIndexSpan = len(newFrames[i]) - len(newFrames[i-30])
-
-		newFrames[i][-frameIndexSpan:,2] = 1
-		newFrames[i][-frameIndexSpan:,3] = 100
-
-		# if i<50:
-		# 	print('step2, the tail of newFrames should be 1, 100\n', newFrames[i][:,2:])
-
-		newFrames[i][:-frameIndexSpan,2] = 0.3
-		newFrames[i][:-frameIndexSpan,3] = 2
-
-		# if i<50:
-		# 	print('step3, everything from the start to -frameIndexSpan should be .3,2\n', newFrames[i][:,2:])
-
-		if i<50:
-			print('in loop\n',newFrames[i][:,2:])
-
-	for i in range(50):
-		print('out of loop\n',newFrames[i])
+		# number of points added since last 5 frames.
+		fiveFramesAgo = indexList[i-30]
+		# in the current frame, set all "stale" points to be small and grey
+		newFrames[i,:fiveFramesAgo,2:] = [.7,2]
 
 	return newFrames
 
@@ -152,7 +131,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
-	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-10]
+	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-1]
 	dateData = locHist[:,1]
 	lat = locHist[:,2]
 	lon = locHist[:,3]
@@ -186,8 +165,8 @@ if __name__ == '__main__':
 	# approx. 1 frame per day
 	timestep = 1/(3*365.25)
 	# each element of frames is the datapoints to make up a given frame
-	frames = get_frame_list(dataArray, timestep, colorData)
-	frames = set_grey_frames(frames)
+	frames, indexList = get_frame_list(dataArray, timestep, colorData)
+	frames = set_grey_frames(frames, indexList)
 	plt.clim(0,1)
 	numFrames = len(frames)
 
@@ -203,7 +182,7 @@ if __name__ == '__main__':
 	anim = make_animate.FuncAnimation(
 		fig, 
 		animate, 
-		fargs=(frames,t),
+		fargs=(frames,t, indexList),
 		init_func=init,
 		frames=numFrames,
 		interval=0,
@@ -211,8 +190,8 @@ if __name__ == '__main__':
 
 
 
-	# plt.show()
-	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	plt.show()
+	#anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 
 	t_diff=[]
@@ -235,6 +214,6 @@ if __name__ == '__main__':
 	ax2.set_ylabel('time per frame', color='r')
 	ax2.tick_params('y', colors='r')
 	fig2.tight_layout()
-	plt.show()
+	#plt.show()
 
 
