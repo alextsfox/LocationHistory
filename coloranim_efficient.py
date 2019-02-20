@@ -89,6 +89,23 @@ def animate(i, frames,t):
 	update_progress(i/numFrames)
 	t.append(get_time())
 	# print(frames[:i,:].shape)
+
+# sets the 5 most recent frames to black, all others to grey
+def set_grey_frames(frames):
+	# n x m x 3 array of frames
+
+	for i in range(len(frames)):
+		if i<=5:
+			frames[i][:,2] = 1
+		else:
+			frames[i][:,2] = 0.75
+
+	# 5 most recent frames set to black, all others are a slightly dim grey
+	for i in range(5,len(frames)):
+		frameIndexSpan = len(frames[i]) - len(frames[i-5])
+		frames[i][len(frames)-frameIndexSpan-1:,2] = 1
+
+	return frames
 	
 
 	return scat,
@@ -123,7 +140,7 @@ if __name__ == '__main__':
 		dataArray[:1,0], 
 		c=dataArray[:1,2], 
 		s=2, 
-		cmap='viridis_r')
+		cmap='Greys')
 	
 	#configure figure style, restrict to CONUS
 	plt.xlim(-125,-65)
@@ -135,7 +152,10 @@ if __name__ == '__main__':
 	timestep = 1/(3*365.25)
 	# each element of frames is the datapoints to make up a given frame
 	frames = get_frame_list(dataArray, timestep, colorData)
+	frames = set_grey_frames(frames)
 	numFrames = len(frames)
+
+
 
 	# print(frames[2][:,1::-1])
 	# print(frames[1][:,1::-1])
