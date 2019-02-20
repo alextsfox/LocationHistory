@@ -93,31 +93,53 @@ def animate(i, frames,t):
 	scat.set_array(np.ravel(frames[i][:,2]))
 	scat.set_sizes(np.ravel(frames[i][:,3]))
 	# scat.set_array(dataArray[:i,2])
-	update_progress(i/numFrames)
+	#update_progress(i/numFrames)
 	t.append(get_time())
 	# print(frames[:i,:].shape)
 
 	return scat,
 
-# sets the 5 most recent frames to black and large, all others to grey
+# sets the 30 most recent frames to black and large, all others to grey
 def set_grey_frames(frames):
 	# n x m x 3 array of frames
 
-	newFrames = np.copy(frames)
+	newFrames = frames.copy()
 
-	for i in range(len(newFrames)):
-		if i<5:
-			newFrames[i][:,2] = 1
-			newFrames[i][:,3] = 10
-		else:
-			newFrames[i][:,2] = 0.5
+	for i in range(30):
+		# print('<30, changing')
+		newFrames[i][:,2] = 1
+		newFrames[i][:,3] = 100
+		# print(newFrames[i][:,2:])
+			
+	#print(newFrames[2])
 
-	# 5 most recent frames set to black and large, all others are a slightly dim grey
-	for i in range(5,len(newFrames)):
-		frameIndexSpan = len(newFrames[i]) - len(newFrames[i-5])
+	# 30 most recent frames set to black and large, all others are a slightly dim grey
+	for i in range(30,len(newFrames)):
+		newFrames[i][:,2] = 0.3
+		newFrames[i][:,3] = 2
+
+		# if i<50:
+		# 	print('step1, everything should be .3,2\n', newFrames[i][:,2:])
+
+		frameIndexSpan = len(newFrames[i]) - len(newFrames[i-30])
+
 		newFrames[i][-frameIndexSpan:,2] = 1
-		newFrames[i][-frameIndexSpan:,3] = 10
-		newFrames[i][:-frameIndexSpan:,2] = 0.75
+		newFrames[i][-frameIndexSpan:,3] = 100
+
+		# if i<50:
+		# 	print('step2, the tail of newFrames should be 1, 100\n', newFrames[i][:,2:])
+
+		newFrames[i][:-frameIndexSpan,2] = 0.3
+		newFrames[i][:-frameIndexSpan,3] = 2
+
+		# if i<50:
+		# 	print('step3, everything from the start to -frameIndexSpan should be .3,2\n', newFrames[i][:,2:])
+
+		if i<50:
+			print('in loop\n',newFrames[i][:,2:])
+
+	for i in range(50):
+		print('out of loop\n',newFrames[i])
 
 	return newFrames
 
@@ -130,7 +152,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
-	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-1]
+	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-10]
 	dateData = locHist[:,1]
 	lat = locHist[:,2]
 	lon = locHist[:,3]
@@ -169,6 +191,12 @@ if __name__ == '__main__':
 	plt.clim(0,1)
 	numFrames = len(frames)
 
+	# for i in range(100):
+	# 	print(frames[i])
+
+	# for i in range(len(frames)):
+	# 	print(i,'\n', frames[i])
+
 	# create animation
 	t=[] #for tracking render time
 
@@ -184,7 +212,7 @@ if __name__ == '__main__':
 
 
 	# plt.show()
-	anim.save(args.fileOut, fps=60, extra_args=['-vcodec', 'libx264'])
+	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 
 	t_diff=[]
