@@ -64,15 +64,15 @@ def set_grey_frames(frames, indexList):
 	# n x m x 3 array of frames
 
 	newFrames = np.copy(frames)
-	newFrames[:,:,2:] = [1,10]
+	newFrames[:,:,2:] = [1,9]
 
 	# 30 most recent frames set to black and large, all others are a slightly dim grey
-	for i in range(30,len(newFrames)):
+	for i in range(20,len(newFrames)):
 
-		# number of points added since last 5 frames.
-		fiveFramesAgo = indexList[i-30]
+		# number of points added since last 20 frames.
+		fiveFramesAgo = indexList[i-20]
 		# in the current frame, set all "stale" points to be small and grey
-		newFrames[i,:fiveFramesAgo,2:] = [.5,2]
+		newFrames[i,:fiveFramesAgo,2:] = [.6,2]
 
 	return newFrames
 
@@ -101,13 +101,14 @@ if __name__ == '__main__':
 			2*np.ones_like(colorData[:,np.newaxis])
 		))
 
-	# approx. 1 frame per day
+	# approx. 3 frame per day
 	timestep = 1/(3*365.25)
 	# each element of frames is the datapoints to make up a given frame
 	frames, indexList = get_frame_list(dataArray, timestep, colorData)
 	frames = set_grey_frames(frames, indexList)
 	
 	np.save(args.fileOut, frames)
+	np.save('indexList', indexList)
 	print('\nsuccesfully saved as', args.fileOut)
 
 

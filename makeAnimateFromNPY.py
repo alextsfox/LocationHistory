@@ -66,9 +66,13 @@ def animate(i, frames,t, indexList):
 	# n x m x 3 array frames
 	# float t
 	#print(frames.shape)
-	scat.set_offsets(frames[i,:indexList[i],:2])
+
+	# what's with this weird indexing [1::-1]? X = lat, Y = lon, and the file is organized by [lat,lon] = [y,x], so we index backwards.
+	scat.set_offsets(frames[i,:indexList[i],1::-1])
 	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
 	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
+	# print('frame', i)
+	# print(frames[i,:indexList[i]])
 	update_progress(i/numFrames)
 	t.append(get_time())
 
@@ -87,17 +91,17 @@ if __name__=='__main__':
 
 	# frames + information on how long each frame is
 	frames = np.load(args.fileIn)
+	indexList = np.load('indexList.npy')
 	os.remove(args.fileIn)
+	os.remove('indexList.npy')
+
 	print(args.fileIn, 'successfully loaded and deleted.')
+	# print('first 10 frames')
+	# print(frames[:10])
 	numFrames = len(frames)
 	timestep = 1/(3*365.25)
 
 	#print(frames[:10])
-	
-	indexList = []
-	for frame in frames:
-		indexList.append(len(frame))
-
 	# figure framework, starting with an empty plot
 	fig = plt.figure(figsize=(30,20))
 	scat = plt.scatter(
@@ -124,8 +128,9 @@ if __name__=='__main__':
 
 	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
+	plt.close()
 
 	tplot = t_diff(t)
-	plt.show(tplot)
+	plt.show()
 
 
