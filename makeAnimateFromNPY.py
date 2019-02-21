@@ -125,7 +125,7 @@ if __name__=='__main__':
 	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 
-	tplot = t_diff()
+	tplot = t_diff(t)
 	plt.show(tplot)
 
 
