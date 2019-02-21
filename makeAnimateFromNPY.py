@@ -3,6 +3,7 @@ import matplotlib.animation as animation
 import numpy as np
 import argparse
 import sys
+import os
 from time import time as get_time
 
 
@@ -86,6 +87,8 @@ if __name__=='__main__':
 
 	# frames + information on how long each frame is
 	frames = np.load(args.fileIn)
+	os.remove(args.fileIn)
+	print(args.fileIn, 'successfully loaded and deleted.')
 	numFrames = len(frames)
 	timestep = 1/(3*365.25)
 
