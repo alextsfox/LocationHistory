@@ -1,6 +1,6 @@
 #  takes a csv file given by csvParser.py, makes a movie of it (or rather, series of movies)
 import matplotlib.pyplot as plt
-import matplotlib.animation as make_animate
+import matplotlib.animation as animation
 import numpy as np
 import argparse
 from datetime import datetime
@@ -89,22 +89,6 @@ def init():
 
 	return scat,
 
-# animation function called by FuncAnimation
-def animate(i, frames,t, indexList):
-	# iterable i
-	# n x m x 3 array frames
-	# float t
-
-	scat.set_offsets(frames[i,:indexList[i],1::-1])
-	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
-	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
-	# scat.set_array(dataArray[:i,2])
-	#update_progress(i/numFrames)
-	t.append(get_time())
-	# print(frames[:i,:].shape)
-
-	return scat,
-
 # sets the 30 most recent frames to black and large, all others to grey
 def set_grey_frames(frames, indexList):
 	# n x m x 3 array of frames
@@ -118,9 +102,24 @@ def set_grey_frames(frames, indexList):
 		# number of points added since last 5 frames.
 		fiveFramesAgo = indexList[i-30]
 		# in the current frame, set all "stale" points to be small and grey
-		newFrames[i,:fiveFramesAgo,2:] = [.7,2]
+		newFrames[i,:fiveFramesAgo,2:] = [.5,2]
 
 	return newFrames
+
+# animation function called by FuncAnimation
+def animate(i, frames,t, indexList):
+	# iterable i
+	# n x m x 3 array frames
+	# float t
+
+	scat.set_offsets(frames[i,:indexList[i],2])
+	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
+	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
+	update_progress(i/numFrames)
+	t.append(get_time())
+
+
+	return scat,
 
 if __name__ == '__main__':
 	
@@ -167,33 +166,30 @@ if __name__ == '__main__':
 	# each element of frames is the datapoints to make up a given frame
 	frames, indexList = get_frame_list(dataArray, timestep, colorData)
 	frames = set_grey_frames(frames, indexList)
+	print(frames[:50,:,:].shape)
+	np.save('movieFrames', frames)
 	plt.clim(0,1)
 	numFrames = len(frames)
-
-	# for i in range(100):
-	# 	print(frames[i])
-
-	# for i in range(len(frames)):
-	# 	print(i,'\n', frames[i])
 
 	# create animation
 	t=[] #for tracking render time
 
-	anim = make_animate.FuncAnimation(
-		fig, 
-		animate, 
-		fargs=(frames,t, indexList),
-		init_func=init,
-		frames=numFrames,
-		interval=0,
-		blit=True)
+	# anim = animation.FuncAnimation(
+	# 	fig, 
+	# 	animate, 
+	# 	fargs=(frames, t, indexList),
+	# 	init_func=init,
+	# 	frames=numFrames,
+	# 	interval=0,
+	# 	blit=True)
 
+	anim = animation.FuncAnimation(fig, animate, fargs=(frames,t,indexList),init_func=init,
+                               frames=numFrames, interval=1, blit=True)
 
-
-	plt.show()
-	#anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	#plt.show()
+	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
-
+	'''
 	t_diff=[]
 	for i in range(1,len(t)):
 		t_diff.append(t[i]-t[i-1])
@@ -214,6 +210,7 @@ if __name__ == '__main__':
 	ax2.set_ylabel('time per frame', color='r')
 	ax2.tick_params('y', colors='r')
 	fig2.tight_layout()
-	#plt.show()
+	plt.show(fig2)
+	'''
 
 
