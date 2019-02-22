@@ -65,4 +65,4 @@ df[::len(df)//15000].to_csv('{csvOut}_015k.csv'.format(csvOut=csvOut))
 df[::len(df)//100000].to_csv('{csvOut}_100k.csv'.format(csvOut=csvOut))
 
 print(df)
-print('Successfully saved .csv files to {}'.format('/'.join(csvOut.slice('/')[:-1])))
+print('Successfully saved .csv files to {}'.format('/'.join(csvOut.split('/')[:-1])))

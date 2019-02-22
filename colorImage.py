@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 from datetime import datetime
 import sys
+import matplotlib as mpl
 
 print('saving preview image...')
 
@@ -14,6 +15,10 @@ print('saving preview image...')
 parser = argparse.ArgumentParser()
 parser.add_argument('csvIn', help='location history CSV file')
 parser.add_argument('pngOut', help='out file path')
+
+requiredNamed = parser.add_argument_group('required named arguments')
+requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, help='Trim the output to a box with corners <north border> <west border> <south border> <east border>')
+
 args = parser.parse_args()
 
 # load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
@@ -25,16 +30,22 @@ yyyymmdd = datetime.utcfromtimestamp(dateData[0]).strftime('%Y%m%d')
 decimalyearstart = float(yyyymmdd[:4] + '.' + str(int(int(yyyymmdd[4:6])/1.2)))
 colorData = ((dateData-dateData[0]))/3.1536E7 + decimalyearstart
 
+# locHist = trim_to_box(locHist, *args.trim)
+
 lat = locHist[:,2]
 lon = locHist[:,3]
 
-fig = plt.figure(figsize=(30,20))
-scat = plt.scatter(lon,lat, c=colorData, s=.4, cmap='viridis_r')
+ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
+width=30
+fig = plt.figure(figsize=(width,width/ratio), dpi=100)
+scat = plt.scatter(lon,lat, c=colorData, s=1, cmap='viridis_r')
 
 #CONUS, visuals
-plt.xlim(-125,-65)
-plt.ylim(25,50)
+#configure figure style, restrict to box
+plt.xlim(args.trim[1], args.trim[3])
+plt.ylim(args.trim[2], args.trim[0])
 plt.clim(colorData[0], colorData[-1])
+
 plt.axis('off')
 
 plt.savefig(args.pngOut)
