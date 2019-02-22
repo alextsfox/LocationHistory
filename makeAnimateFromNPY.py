@@ -23,12 +23,12 @@ def t_diff(t):
 	ax1.plot(range(len(t)), t, 'b-')
 	ax1.set_xlabel('number of frames')
 	
-	ax1.set_ylabel('total time', color='b')
+	ax1.set_ylabel('total render time', color='b')
 	ax1.tick_params('y', colors='b')
 
 	ax2 = ax1.twinx()
 	ax2.plot(range(len(t_diff_smooth)),t_diff_smooth, 'r-')
-	ax2.set_ylabel('time per frame', color='r')
+	ax2.set_ylabel('render time per frame', color='r')
 	ax2.tick_params('y', colors='r')
 
 	plt.title('Animation analytics')
@@ -76,11 +76,11 @@ def animate(i, frames,t, indexList):
 	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
 	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
 
-	print(frames[i,indexList[i]-50:indexList[i],1::-1])
+	print(frames[i,:indexList[i+1],:])
 
 	# progress bar and analytics
 	update_progress(i/numFrames)
-	t.append(get_time())
+	#t.append(get_time())
 
 	return scat,
 
@@ -92,7 +92,7 @@ if __name__=='__main__':
 	parser.add_argument('-v', '--verbose', help='advanced analytics at the end', action='store_true')
 	args = parser.parse_args()
 
-	t = [] # for tracking render time
+	t1 = [] # for tracking render time
 
 	# frames + information on how long each frame is
 	frames = np.load('frames.npy')
@@ -124,7 +124,7 @@ if __name__=='__main__':
 	anim = animation.FuncAnimation(
 			fig, 
 			animate, 
-			fargs=(frames,t,indexList),
+			fargs=(frames,t1,indexList),
 			init_func=init,
 			frames=numFrames, 
 			interval=1, 
@@ -135,7 +135,7 @@ if __name__=='__main__':
 	plt.close()
 
 	if args.verbose:
-		tplot = t_diff(t)
+		tplot = t_diff(t1)
 		plt.show()
 
 

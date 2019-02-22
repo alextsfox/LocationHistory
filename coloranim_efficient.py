@@ -131,7 +131,7 @@ if __name__ == '__main__':
 	frames = set_grey_frames(frames, indexList)
 	
 	np.save('frames', frames)
-	print('created frames.npy and indexList.npy')
 	np.save('indexList', indexList)
+	print('created frames.npy and indexList.npy')
 
 
