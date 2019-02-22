@@ -20,5 +20,6 @@ If you have location tracking turned on on your google account, this tool turns 
       bash RunTool.sh
 4. Wait a while
 
-**Credits**
+**Credit**
+
 Google Timeline Parser to filter the .json archive: https://github.com/javier/google_timeline_parser
