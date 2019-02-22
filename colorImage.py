@@ -28,7 +28,7 @@ colorData = ((dateData-dateData[0]))/3.1536E7 + decimalyearstart
 lat = locHist[:,2]
 lon = locHist[:,3]
 
-fig = plt.figure(figsize=(120,80))
+fig = plt.figure(figsize=(30,20))
 scat = plt.scatter(lon,lat, c=colorData, s=.4, cmap='viridis_r')
 
 #CONUS, visuals

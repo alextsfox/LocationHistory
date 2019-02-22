@@ -76,6 +76,8 @@ def animate(i, frames,t, indexList):
 	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
 	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
 
+	print(frames[i,indexList[i]-50:indexList[i],1::-1])
+
 	# progress bar and analytics
 	update_progress(i/numFrames)
 	t.append(get_time())

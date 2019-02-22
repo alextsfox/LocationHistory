@@ -86,7 +86,7 @@ def set_grey_frames(frames, indexList):
 	# n x m x 3 array of frames
 
 	newFrames = np.copy(frames)
-	newFrames[:,:,2:] = [1,9]
+	newFrames[:,:,2:] = [1.,9.]
 
 	# 30 most recent frames set to black and large, all others are a slightly dim grey
 	for i in range(12,len(newFrames)-1):
@@ -94,9 +94,9 @@ def set_grey_frames(frames, indexList):
 		# number of points added since last 20 frames.
 		fiveFramesAgo = indexList[i-12]
 		# in the current frame, set all "stale" points to be small and grey
-		newFrames[i,:fiveFramesAgo,2:] = [.6,2]
+		newFrames[i,:fiveFramesAgo,2:] = [0.6,2.]
 
-	newFrames[-1,:,2:] = [.6,2]
+	newFrames[-1,:,2:] = [0.6,2.]
 
 	return newFrames
 

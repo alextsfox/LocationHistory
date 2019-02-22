@@ -9,7 +9,7 @@ RawJSON=$dir/Location-History.json
 #name the output .json file (only change me if you have to!)
 filteredJSON=$dir/filtered_locations_.json
 
-mkdir $dir/figs
+mkdir -p $dir/figs
 
 # STEP 1: MAKE A CSV FILE
 #echo 'Filtering location history archive...'
@@ -24,7 +24,7 @@ mkdir $dir/figs
 echo 'Making your movie, this will take a long time...'
 
 #usage: coloranim_efficient.py <.csv file path>
-python3 coloranim_efficient.py $dir/FilteredLocations_100k.csv
+python3 coloranim_efficient.py $dir/FilteredLocations_5k.csv
 
 # usage: makeAnimateFromNPY.py <.mp4 output filename> <optional argument -v turns on analytics>
-python3 makeAnimateFromNPY.py $dir/figs/MyTravelsDC_$Resolution.mp4 -v
+python3 makeAnimateFromNPY.py $dir/figs/MyTravels_5k.mp4 -v
