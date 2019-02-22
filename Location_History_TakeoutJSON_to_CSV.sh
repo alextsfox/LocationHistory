@@ -18,11 +18,11 @@ echo 'Converting archive to csv...'
 #python3 csvParser.py $filteredJSON $dir
 
 #select the resoltuion (choose between Ultra Low Res: '05k', Low Res: '15k', and Full Res: 'Full')
-Resolution=15k
+Resolution=Full
 
-python3 colorImage.py $dir/FilteredLocations$Resolution.csv $dir/figs/MyTravels_$Resolution.png
+#python3 colorImage.py $dir/DCFull.csv $dir/figs/MyTravelsDC_$Resolution.png
 
 echo 'Making your movie, this will take a long time...'
 
-python3 coloranim_efficient.py $dir/FilteredLocations$Resolution.csv $dir/frames_$Resolution
-python3 makeAnimateFromNPY.py $dir/frames_$Resolution.npy $dir/figs/MyTravels_$Resolution.mp4
+python3 coloranim_efficient.py $dir/DCFull.csv $dir/frames_$Resolution
+python3 makeAnimateFromNPY.py $dir/frames_$Resolution.npy $dir/figs/MyTravelsDC_$Resolution.mp4

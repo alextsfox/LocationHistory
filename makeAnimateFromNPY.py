@@ -117,6 +117,10 @@ if __name__=='__main__':
 	plt.axis('off')
 	plt.clim(0,1)
 
+	#Northeast corridor 
+	plt.xlim(-82.,-73.9)
+	plt.ylim(38.,40.83)
+
 	anim = animation.FuncAnimation(
 			fig, 
 			animate, 
@@ -126,7 +130,7 @@ if __name__=='__main__':
 			interval=1, 
 			blit=True)
 
-	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	anim.save(args.fileOut, fps=24, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 	plt.close()
 

@@ -38,6 +38,11 @@ scat = plt.scatter(lon,lat, c=colorData, s=.4, cmap='viridis_r')
 #CONUS
 plt.xlim(-125,-65)
 plt.ylim(25,50)
+
+#Northeast corridor
+# plt.xlim(-82.,-73.9)
+# plt.ylim(38.,40.83)
+
 plt.clim(colorData[0], colorData[-1])
 plt.axis('off')
 
