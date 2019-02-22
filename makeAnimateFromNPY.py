@@ -118,8 +118,6 @@ if __name__=='__main__':
 		cmap='Greys')
 
 	#configure figure style, restrict to box
-	# maxLat, minLat = np.max(frames[-1,:,0][frames[-1,:,0]!= -9999]), np.min(frames[-1,:,0][frames[-1,:,0]!= -9999])
-	# maxLon, minLon = np.max(frames[-1,:,1][frames[-1,:,1]!= -9999]), np.min(frames[-1,:,1][frames[-1,:,1]!= -9999])
 	plt.xlim(args.trim[1], args.trim[3])
 	plt.ylim(args.trim[2], args.trim[0])
 	plt.axis('off')

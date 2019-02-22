@@ -9,32 +9,6 @@ from datetime import datetime
 import sys
 import matplotlib as mpl
 
-# def trim_to_box(arr, U,Le,Lo,R):
-# 	UL = (U,Le)
-# 	LR = (Lo,R)
-
-# 	print(UL, LR)
-# 	latList = np.copy(arr[:,2])
-# 	print(latList)
-# 	latList[latList>UL[0]] = np.nan
-# 	latList[latList<LR[0]] = np.nan
-
-# 	lonList = np.copy(arr[:,3])
-# 	lonList[lonList<UL[1]] = np.nan
-# 	lonList[lonList>LR[1]] = np.nan
-
-# 	newArr = np.hstack((
-# 						arr[:,0][:,np.newaxis],
-# 						arr[:,1][:,np.newaxis],
-# 						latList[:,np.newaxis],
-# 						lonList[:,np.newaxis]
-# 						))
-
-# 	# remove nans
-# 	newArr = newArr[~np.isnan(newArr).any(axis=1)]
-
-# 	return newArr
-
 print('saving preview image...')
 
 # get csv file
@@ -71,8 +45,6 @@ scat = plt.scatter(lon,lat, c=colorData, s=1, cmap='viridis_r')
 plt.xlim(args.trim[1], args.trim[3])
 plt.ylim(args.trim[2], args.trim[0])
 plt.clim(colorData[0], colorData[-1])
-mpl.rcParams.update({'font.size': 42})
-plt.colorbar()
 
 plt.axis('off')
 
