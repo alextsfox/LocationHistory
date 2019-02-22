@@ -12,19 +12,27 @@ filteredJSON=$dir/filtered_locations_.json
 mkdir -p $dir/figs
 
 # STEP 1: MAKE A CSV FILE
-echo 'Filtering location history archive...'
-`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
-python3 csvParser.py $filteredJSON
+# echo 'Filtering location history archive...'
+# `cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
+# python3 csvParser.py $filteredJSON
+
 
 # STEP 2: MAKE A PNG FILE
+
+# set the borders of your image, decimal degrees (change me!)
+N=42.57
+S=40.09
+W=-74.7
+E=-70.67
+
 #Usage: colorImage.py <.csv file path> <.png output filename>
-python3 colorImage.py $dir/FilteredLocations_Full.csv $dir/figs/MyTravelsDC_$Resolution.png
+python3 colorImage.py $dir/FilteredLocations_Full.csv $dir/figs/TrimBox.png -t $N $W $S $E
 
 # STEP3: MAKE A MOVIE
 echo 'Making your movie, this will take a long time...'
 
 #usage: coloranim_efficient.py <.csv file path>
-python3 coloranim_efficient.py $dir/FilteredLocations_005k.csv
+python3 coloranim_efficient.py $dir/TrimBox_005k.csv -t $N $W $S $E
 
 # usage: makeAnimateFromNPY.py <.mp4 output filename> <optional argument -v turns on analytics>
-python3 makeAnimateFromNPY.py $dir/figs/MyTravels_005k.mp4 -v
+python3 makeAnimateFromNPY.py $dir/figs/TrimBox_005k.mp4 -v

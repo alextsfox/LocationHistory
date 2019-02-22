@@ -24,6 +24,30 @@ def update_progress(progress):
 	sys.stdout.write(text)
 	sys.stdout.flush()
 
+# trims data to exclude everything outside of a given box
+def trim_to_box(arr, U,Le, Lo,R):
+	UL = (U,Le)
+	LR = (Lo,R)
+
+	latList = np.copy(arr[:,0])
+	latList[latList>UL[0]] = np.nan
+	latList[latList<LR[0]] = np.nan
+
+	lonList = np.copy(arr[:,1])
+	lonList[lonList<UL[1]] = np.nan
+	lonList[lonList>LR[1]] = np.nan
+
+	newArr = np.hstack((
+						latList[:,np.newaxis],
+						lonList[:,np.newaxis],
+						arr[:,2][:,np.newaxis],
+						arr[:,3][:,np.newaxis]))
+
+	# remove nans
+	newArr = newArr[~np.isnan(newArr).any(axis=1)]
+
+	return newArr
+						
 # take a unix timestamp in seconds, convert to a decimal of a year
 def get_decimal_year(timestamp):
 	# timestamp: unix timestamp, int
@@ -105,6 +129,10 @@ if __name__ == '__main__':
 	# get csv file and outpath
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileIn', help='location history CSV file')
+
+	requiredNamed = parser.add_argument_group('required named arguments')
+	requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, help='Trim the output to a box with corners <north border> <west border> <south border> <east border>')
+	
 	args = parser.parse_args()
 
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
@@ -123,6 +151,8 @@ if __name__ == '__main__':
 			colorData[:,np.newaxis],
 			2*np.ones_like(colorData[:,np.newaxis])
 		))
+
+	dataArray = trim_to_box(dataArray, *args.trim)
 
 	# approx. 3 frame per day
 	timestep = 1/(3*365.25)

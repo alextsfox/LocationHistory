@@ -90,6 +90,7 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileOut', help='out file path')
 	parser.add_argument('-v', '--verbose', help='advanced analytics at the end', action='store_true')
+
 	args = parser.parse_args()
 
 	t1 = [] # for tracking render time
@@ -106,6 +107,7 @@ if __name__=='__main__':
 	timestep = 1/(3*365.25)
 
 	# figure framework, starting with an empty plot
+	ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
 	fig = plt.figure(figsize=(30,20))
 	scat = plt.scatter(
 		frames[:1,1],
@@ -114,9 +116,11 @@ if __name__=='__main__':
 		s=frames[:1,3], 
 		cmap='Greys')
 
-	#configure figure style, restrict to CONUS
-	plt.xlim(-125,-65)
-	plt.ylim(30,50)
+	#configure figure style, restrict to box
+	# maxLat, minLat = np.max(frames[-1,:,0][frames[-1,:,0]!= -9999]), np.min(frames[-1,:,0][frames[-1,:,0]!= -9999])
+	# maxLon, minLon = np.max(frames[-1,:,1][frames[-1,:,1]!= -9999]), np.min(frames[-1,:,1][frames[-1,:,1]!= -9999])
+	plt.xlim(args.trim[1], args.trim[3])
+	plt.ylim(args.trim[2], args.trim[0])
 	plt.axis('off')
 	plt.clim(0,1)
 
