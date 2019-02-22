@@ -69,18 +69,15 @@ def animate(i, frames,t, indexList):
 	# iterable i
 	# n x m x 3 array frames
 	# float t
-	#print(frames.shape)
 
 	# what's with this weird indexing [1::-1]? X = lat, Y = lon, and the file is organized by [lat,lon] = [y,x], so we index backwards.
 	scat.set_offsets(frames[i,:indexList[i],1::-1])
 	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
 	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
 
-	print(frames[i,:indexList[i+1],:])
-
 	# progress bar and analytics
 	update_progress(i/numFrames)
-	#t.append(get_time())
+	t.append(get_time())
 
 	return scat,
 
@@ -90,6 +87,9 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileOut', help='out file path')
 	parser.add_argument('-v', '--verbose', help='advanced analytics at the end', action='store_true')
+
+	requiredNamed = parser.add_argument_group('required named arguments')
+	requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, help='Trim the output to a box with corners <north border> <west border> <south border> <east border>')
 
 	args = parser.parse_args()
 
@@ -108,7 +108,8 @@ if __name__=='__main__':
 
 	# figure framework, starting with an empty plot
 	ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
-	fig = plt.figure(figsize=(30,20))
+	width = 30
+	fig = plt.figure(figsize=(width,width/ratio), dpi=100)
 	scat = plt.scatter(
 		frames[:1,1],
 		frames[:1,0], 
@@ -136,10 +137,5 @@ if __name__=='__main__':
 
 	anim.save(args.fileOut, fps=24, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
-	plt.close()
-
-	if args.verbose:
-		tplot = t_diff(t1)
-		plt.show()
 
 

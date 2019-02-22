@@ -62,16 +62,14 @@ lat = locHist[:,2]
 lon = locHist[:,3]
 
 ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
-width=60
-fig = plt.figure(figsize=(width,width/ratio))
+width=30
+fig = plt.figure(figsize=(width,width/ratio), dpi=100)
 scat = plt.scatter(lon,lat, c=colorData, s=1, cmap='viridis_r')
 
 #CONUS, visuals
 #configure figure style, restrict to box
 plt.xlim(args.trim[1], args.trim[3])
 plt.ylim(args.trim[2], args.trim[0])
-# plt.xlim(-125,-65)
-# plt.ylim(25,50)
 plt.clim(colorData[0], colorData[-1])
 mpl.rcParams.update({'font.size': 42})
 plt.colorbar()
