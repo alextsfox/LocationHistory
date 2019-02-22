@@ -8,6 +8,7 @@ If you have location tracking turned on on your google account, this tool turns 
     ffmpeg
   
 **Python3 dependencies:**
+
     matplotlib
     numpy
     pandas
