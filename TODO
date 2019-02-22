@@ -1,3 +1,0 @@
-#TODO
-
-* right now, even the smallest frame array is 500MB. To fix this, note that the only dynamic part of the array is the color and image sections. As a quick fix, we can make use of just a dynamic nx2 array for the color and size, downsizing the files by 50%. Additionally, we might just be able to make do with one array and color it in the animation function.
