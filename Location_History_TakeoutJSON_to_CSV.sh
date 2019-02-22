@@ -1,28 +1,30 @@
 #!usr/bin/bash
 
 #directory containing the google takeout .json file (change me!)
-dir=LocDir02142019
+dir=Takeout/Location-History
 
 #location of the google takeout .json file (change me!)
-RawJSON=LocDir02142019/location_history_02142019.json
+RawJSON=$dir/Location-History.json
 
-
+#name the output .json file (only change me if you have to!)
 filteredJSON=$dir/filtered_locations_.json
 
+mkdir $dir/figs
+
+# STEP 1: MAKE A CSV FILE
 #echo 'Filtering location history archive...'
-
 #`cat $RawJSON |jq "[.locations[] | {latitudeE7, longitudeE7, timestampMs}]" > $filteredJSON`
+#python3 csvParser.py $filteredJSON
 
-echo 'Converting archive to csv...'
+# STEP 2: MAKE A PNG FILE
+#Usage: colorImage.py <.csv file path> <.png output filename>
+#python3 colorImage.py $dir/FilteredLocations_Full.csv $dir/figs/MyTravelsDC_$Resolution.png
 
-#python3 csvParser.py $filteredJSON $dir
-
-#select the resoltuion (choose between Ultra Low Res: '05k', Low Res: '15k', and Full Res: 'Full')
-Resolution=Full
-
-#python3 colorImage.py $dir/DCFull.csv $dir/figs/MyTravelsDC_$Resolution.png
-
+# STEP3: MAKE A MOVIE
 echo 'Making your movie, this will take a long time...'
 
-python3 coloranim_efficient.py $dir/DCFull.csv $dir/frames_$Resolution
-python3 makeAnimateFromNPY.py $dir/frames_$Resolution.npy $dir/figs/MyTravelsDC_$Resolution.mp4
+#usage: coloranim_efficient.py <.csv file path>
+python3 coloranim_efficient.py $dir/FilteredLocations_100k.csv
+
+# usage: makeAnimateFromNPY.py <.mp4 output filename> <optional argument -v turns on analytics>
+python3 makeAnimateFromNPY.py $dir/figs/MyTravelsDC_$Resolution.mp4 -v

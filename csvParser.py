@@ -59,11 +59,10 @@ df['colorbar'] = [(1000*i)//len(t) for i in range(len(t))]
 
 csvOut = '/'.join(args.jsonIn.split('/')[:-1]) + '/FilteredLocations'
 
-else:
-	df.to_csv('{csvOut}_Full.csv'.format(csvOut=csvOut))
-	df[::len(df)//5000].to_csv('{csvOut}_005k.csv'.format(csvOut=csvOut))
-	df[::len(df)//15000].to_csv('{csvOut}_015k.csv'.format(csvOut=csvOut))
-	df[::len(df)//100000].to_csv('{csvOut}_100k.csv'.format(csvOut=csvOut))
+df.to_csv('{csvOut}_Full.csv'.format(csvOut=csvOut))
+df[::len(df)//5000].to_csv('{csvOut}_005k.csv'.format(csvOut=csvOut))
+df[::len(df)//15000].to_csv('{csvOut}_015k.csv'.format(csvOut=csvOut))
+df[::len(df)//100000].to_csv('{csvOut}_100k.csv'.format(csvOut=csvOut))
 
 print(df)
 print('Successfully saved .csv files to {}'.format('/'.join(csvOut.slice('/')[:-1])))
