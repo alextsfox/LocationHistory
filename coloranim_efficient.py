@@ -4,6 +4,25 @@ import argparse
 from datetime import datetime
 import sys
 
+# a nice looking progress bar
+def update_progress(progress):
+	barLength = 63 # Modify this to change the length of the progress bar
+	status = ""
+	if isinstance(progress, int):
+		progress = float(progress)
+	if not isinstance(progress, float):
+		progress = 0
+		status = "error: progress var must be float\r\n"
+	if progress < 0:
+		progress = 0
+		status = "Halt...\r\n"
+	if progress >= 1:
+		progress = 1
+		status = "Done...\r\n"
+	block = int(round(barLength*progress))
+	text = "\r[{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), round(progress*100,2), status)
+	sys.stdout.write(text)
+	sys.stdout.flush()
 
 # take a unix timestamp in seconds, convert to a decimal of a year
 def get_decimal_year(timestamp):
@@ -30,7 +49,9 @@ def get_next_index(i, timestep, colorData):
 	# return the proper number of frames to advance to
 	return nextIndex
 
-# creates an array of the data point indexes to stop each frame at
+# creates an array of the movie frames.
+# You may notice that this file has the name "efficient" in the title. Please note that "efficient" is used as purely a relative term here.
+# Don't judge me.
 def get_frame_list(dataArray, timestep, colorData):
 	# data is an nxn array
 	# timestep is a float
@@ -51,6 +72,7 @@ def get_frame_list(dataArray, timestep, colorData):
 	
 	frames = np.delete(frames, np.s_[-2:], axis=1)
 	
+	print('Creating movie frames...')
 	for i in range(len(indexList) - 1):
 		frames[i,:indexList[i+1]] = dataArray[:indexList[i+1]]
 
@@ -64,15 +86,17 @@ def set_grey_frames(frames, indexList):
 	# n x m x 3 array of frames
 
 	newFrames = np.copy(frames)
-	newFrames[:,:,2:] = [1,9]
+	newFrames[:,:,2:] = [1.,9.]
 
 	# 30 most recent frames set to black and large, all others are a slightly dim grey
-	for i in range(20,len(newFrames)):
+	for i in range(12,len(newFrames)-1):
 
 		# number of points added since last 20 frames.
-		fiveFramesAgo = indexList[i-20]
+		fiveFramesAgo = indexList[i-12]
 		# in the current frame, set all "stale" points to be small and grey
-		newFrames[i,:fiveFramesAgo,2:] = [.6,2]
+		newFrames[i,:fiveFramesAgo,2:] = [0.6,2.]
+
+	newFrames[-1,:,2:] = [0.6,2.]
 
 	return newFrames
 
@@ -81,7 +105,6 @@ if __name__ == '__main__':
 	# get csv file and outpath
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileIn', help='location history CSV file')
-	parser.add_argument('fileOut', help='out file path containing frame information')
 	args = parser.parse_args()
 
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
@@ -107,8 +130,8 @@ if __name__ == '__main__':
 	frames, indexList = get_frame_list(dataArray, timestep, colorData)
 	frames = set_grey_frames(frames, indexList)
 	
-	np.save(args.fileOut, frames)
+	np.save('frames', frames)
 	np.save('indexList', indexList)
-	print('\nsuccesfully saved as', args.fileOut)
+	print('created frames.npy and indexList.npy')
 
 

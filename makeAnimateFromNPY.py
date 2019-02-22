@@ -6,12 +6,15 @@ import sys
 import os
 from time import time as get_time
 
-
+# displays analytics at the end
 def t_diff(t):
+
+	# frame render time array
 	t_diff=[]
 	for i in range(1,len(t)):
 		t_diff.append(t[i]-t[i-1])
 
+	# low-pass filter
 	t_diff_smooth = []
 	for i in range(len(t_diff) - 21):
 		t_diff_smooth.append(np.mean(t_diff[i:i+20]))
@@ -20,14 +23,15 @@ def t_diff(t):
 	ax1.plot(range(len(t)), t, 'b-')
 	ax1.set_xlabel('number of frames')
 	
-	# Make the y-axis label, ticks and tick labels match the line color.
-	ax1.set_ylabel('total time', color='b')
+	ax1.set_ylabel('total render time', color='b')
 	ax1.tick_params('y', colors='b')
 
 	ax2 = ax1.twinx()
 	ax2.plot(range(len(t_diff_smooth)),t_diff_smooth, 'r-')
-	ax2.set_ylabel('time per frame', color='r')
+	ax2.set_ylabel('render time per frame', color='r')
 	ax2.tick_params('y', colors='r')
+
+	plt.title('Animation analytics')
 	fig2.tight_layout()
 	
 	return fig2
@@ -71,11 +75,12 @@ def animate(i, frames,t, indexList):
 	scat.set_offsets(frames[i,:indexList[i],1::-1])
 	scat.set_array(np.ravel(frames[i,:indexList[i],2]))
 	scat.set_sizes(np.ravel(frames[i,:indexList[i],3]))
-	# print('frame', i)
-	# print(frames[i,:indexList[i]])
-	update_progress(i/numFrames)
-	t.append(get_time())
 
+	print(frames[i,:indexList[i+1],:])
+
+	# progress bar and analytics
+	update_progress(i/numFrames)
+	#t.append(get_time())
 
 	return scat,
 
@@ -83,25 +88,23 @@ if __name__=='__main__':
 
 	# get csv file and outpath
 	parser = argparse.ArgumentParser()
-	parser.add_argument('fileIn', help='movie frames CSV file')
 	parser.add_argument('fileOut', help='out file path')
+	parser.add_argument('-v', '--verbose', help='advanced analytics at the end', action='store_true')
 	args = parser.parse_args()
 
-	t = [] # for tracking render time
+	t1 = [] # for tracking render time
 
 	# frames + information on how long each frame is
-	frames = np.load(args.fileIn)
+	frames = np.load('frames.npy')
 	indexList = np.load('indexList.npy')
-	os.remove(args.fileIn)
+	os.remove('frames.npy')
 	os.remove('indexList.npy')
 
-	print(args.fileIn, 'successfully loaded and deleted.')
-	# print('first 10 frames')
-	# print(frames[:10])
+	print('frames.npy and indexList.npy successfully loaded and deleted.')
+
 	numFrames = len(frames)
 	timestep = 1/(3*365.25)
 
-	#print(frames[:10])
 	# figure framework, starting with an empty plot
 	fig = plt.figure(figsize=(30,20))
 	scat = plt.scatter(
@@ -117,20 +120,22 @@ if __name__=='__main__':
 	plt.axis('off')
 	plt.clim(0,1)
 
+	print('Saving animation...')
 	anim = animation.FuncAnimation(
 			fig, 
 			animate, 
-			fargs=(frames,t,indexList),
+			fargs=(frames,t1,indexList),
 			init_func=init,
 			frames=numFrames, 
 			interval=1, 
 			blit=True)
 
-	anim.save(args.fileOut, fps=30, extra_args=['-vcodec', 'libx264'])
+	anim.save(args.fileOut, fps=24, extra_args=['-vcodec', 'libx264'])
 	print('\nsuccesfully saved as', args.fileOut)
 	plt.close()
 
-	tplot = t_diff(t)
-	plt.show()
+	if args.verbose:
+		tplot = t_diff(t1)
+		plt.show()
 
 
