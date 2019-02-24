@@ -59,24 +59,34 @@ def get_decimal_year(timestamp):
 
 # this function performs normalizes the frame length by timestamp
 # otherwise, each frame would span an arbitrary amount of time.
-def get_next_index(i, timestep, colorData):
+def get_next_index(i, timestep, colorData, **residual):
 	# i is an iterable integer
 	# needs to output an index value to jump to
+	# residual is a lsit
 	
 	# adjust the number datapoints to advance incrementally until the desired timestep is reached
 	di = 0
+	oldTimestep = timestep
 	while timestep > 0:
 		timestep -= (colorData[i+di + 1] - colorData[i+di])
 		di += 1
 
 	nextIndex = i + di
+
+	# if timestep is positive, then the frame is shorter. So oldTimestep-timestep gives how much longer the plotted timestep is than the real timestep
+	# a value of residual < 1 implies that the plotted timestep is shorter than it should be
+	if not args.verbose:
+		return nextIndex
+	if args.verbose:
+		residual.append(1 - timestep/oldTimestep)
+		return nextIndex, residual
 	# return the proper number of frames to advance to
-	return nextIndex
+	
 
 # creates an array of the movie frames.
 # You may notice that this file has the name "efficient" in the title. Please note that "efficient" is used as purely a relative term here.
 # Don't judge me.
-def get_frame_list(dataArray, timestep, colorData):
+def get_frame_list(dataArray, timestep, colorData, residual, **residual):
 	# data is an nxn array
 	# timestep is a float
 
@@ -86,7 +96,10 @@ def get_frame_list(dataArray, timestep, colorData):
 	while nextIndex < len(dataArray) - 1:
 		indexList.append(nextIndex)
 		try:
-			nextIndex = get_next_index(nextIndex, timestep, colorData)
+			if not args.verbose:
+				nextIndex= get_next_index(nextIndex, timestep, colorData)
+			else:
+				nextIndex, residual = get_next_index(nextIndex, timestep, colorData, residual)
 		except IndexError as err:
 			break
 
@@ -100,10 +113,11 @@ def get_frame_list(dataArray, timestep, colorData):
 	for i in range(len(indexList) - 1):
 		frames[i,:indexList[i+1]] = dataArray[:indexList[i+1]]
 
-	
-
 	# frames[i] give all the data points needed to create a frame
-	return frames, indexList
+	if not args.verbose:
+		return frames, indexList
+	else:
+		return frames, indexList, residual	
 
 # sets the 30 most recent frames to black and large, all others to grey
 def set_grey_frames(frames, indexList):
@@ -129,7 +143,7 @@ if __name__ == '__main__':
 	# get csv file and outpath
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileIn', help='location history CSV file')
-
+	parser.add_argument('-v', '--verbose', action='store_true', help='displayed time normalization analytics')
 	requiredNamed = parser.add_argument_group('required named arguments')
 	requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, help='Trim the output to a box with corners <north border> <west border> <south border> <east border>')
 	
@@ -157,9 +171,22 @@ if __name__ == '__main__':
 	# approx. 3 frame per day
 	timestep = 1/(3*365.25)
 	# each element of frames is the datapoints to make up a given frame
-	frames, indexList = get_frame_list(dataArray, timestep, colorData)
-	frames = set_grey_frames(frames, indexList)
+
+	if not args.verbose:
+		frames, indexList = get_frame_list(dataArray, timestep, colorData)
+	else:
+		residual=[]
+		frames, indexList, residual = get_frame_list(dataArray, timestep, colorData, residual)
 	
+	frames = set_grey_frames(frames, indexList)
+
+	# plots a historgram of residuals
+
+	if args.verbose:
+		plt.hist(residual, bins=20, range=(0,2))
+		plt.xlabel('Frame Normalization Factor (<1 means frames are shorter than expected)')
+		plt.show()
+
 	np.save('frames', frames)
 	np.save('indexList', indexList)
 	print('created frames.npy and indexList.npy')
