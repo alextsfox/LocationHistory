@@ -9,6 +9,29 @@ from datetime import datetime
 import sys
 import matplotlib as mpl
 
+def trim_to_box(arr, U,Le, Lo,R):
+	UL = (U,Le)
+	LR = (Lo,R)
+
+	latList = np.copy(arr[:,2])
+	latList[latList>UL[0]] = np.nan
+	latList[latList<LR[0]] = np.nan
+	
+	lonList = np.copy(arr[:,3])
+	lonList[lonList<UL[1]] = np.nan
+	lonList[lonList>LR[1]] = np.nan
+
+	newArr = np.hstack((
+						arr[:,0][:,np.newaxis],
+						arr[:,1][:,np.newaxis],
+						latList[:,np.newaxis],
+						lonList[:,np.newaxis]))
+
+	# remove nans
+	newArr = newArr[~np.isnan(newArr).any(axis=1)]
+
+	return newArr
+
 print('saving preview image...')
 
 # get csv file
@@ -22,7 +45,8 @@ requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, h
 args = parser.parse_args()
 
 # load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
-locHist = np.loadtxt(args.csvIn, delimiter = ',', skiprows=1)[::-1]
+locHistRaw = np.loadtxt(args.csvIn, delimiter = ',', skiprows=1)[::-1]
+locHist = trim_to_box(locHistRaw, *args.trim)
 
 # incredibly messy way of getting an understandable timeline for the colorbar
 dateData = locHist[:,1]
@@ -45,6 +69,7 @@ scat = plt.scatter(lon,lat, c=colorData, s=1, cmap='viridis_r')
 plt.xlim(args.trim[1], args.trim[3])
 plt.ylim(args.trim[2], args.trim[0])
 plt.clim(colorData[0], colorData[-1])
+plt.colorbar()
 
 plt.axis('off')
 
