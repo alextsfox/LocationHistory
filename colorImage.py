@@ -25,12 +25,12 @@ def trim_to_box(arr, U,Le, Lo,R):
 	lonList[lonList>LR[1]] = np.nan
 
 	dateList = np.copy(arr[:,1])
-	capDates = [int(date) for date in args.dates]
-	stamp1 = time.mktime((capDates[0],capDates[1],capDates[2],0,0,0,0,0,0))
-	stamp2 = time.mktime((capDates[3],capDates[4],capDates[5],0,0,0,0,0,0))
-
-	dateList[dateList<stamp1] = np.nan
-	dateList[dateList>stamp2] = np.nan
+	if args.dates is not None:
+		capDates = [int(date) for date in args.dates]
+		stamp1 = time.mktime((capDates[0],capDates[1],capDates[2],0,0,0,0,0,0))
+		stamp2 = time.mktime((capDates[3],capDates[4],capDates[5],0,0,0,0,0,0))
+		dateList[dateList<stamp1] = np.nan
+		dateList[dateList>stamp2] = np.nan
 
 	newArr = np.hstack((
 						arr[:,0][:,np.newaxis],
