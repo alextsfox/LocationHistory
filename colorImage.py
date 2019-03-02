@@ -40,11 +40,6 @@ def trim_to_box(arr, U,Le, Lo,R):
 
 	# remove nans
 	newArr = newArr[~np.isnan(newArr).any(axis=1)]
-	print(newArr)
-	print(arr[:,1].shape)
-	print(newArr.shape)
-
-	print(np.min(newArr[:,1]))
 
 	return newArr
 
