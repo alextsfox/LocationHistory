@@ -60,19 +60,26 @@ def get_decimal_year(timestamp):
 
 # this function performs normalizes the frame length by timestamp
 # otherwise, each frame would span an arbitrary amount of time.
-def get_next_index(i, timestep, colorData, **kwargs):
+def get_next_index(i, dt, timeList, **kwargs):
 	# i is an iterable integer
 	# needs to output an index value to jump to
 	# residual is a lsit
 	
 	# adjust the number datapoints to advance incrementally until the desired timestep is reached
-	di = 0
-	oldTimestep = timestep
-	while timestep > 0:
-		timestep -= (colorData[i+di + 1] - colorData[i+di])
-		di += 1
+	# di = 0
+	# oldTimestep = timestep
+	# while timestep > 0:
+	# 	timestep -= (timeList[i+di + 1] - timeList[i+di])
+	# 	di += 1
 
-	nextIndex = i + di
+	# nextIndex = i + di
+	# print(timeList)
+
+
+	
+
+
+
 
 	# if timestep is positive, then the frame is shorter. So oldTimestep-timestep gives how much longer the plotted timestep is than the real timestep
 	# a value of residual < 1 implies that the plotted timestep is shorter than it should be
@@ -88,7 +95,7 @@ def get_next_index(i, timestep, colorData, **kwargs):
 # creates an array of the movie frames.
 # You may notice that this file has the name "efficient" in the title. Please note that "efficient" is used as purely a relative term here.
 # Don't judge me.
-def get_frame_list(dataArray, timestep, colorData, **kwargs):
+def get_frame_list(dataArray, timestep, timeList, **kwargs):
 	# data is an nxn array
 	# timestep is a float
 
@@ -99,9 +106,9 @@ def get_frame_list(dataArray, timestep, colorData, **kwargs):
 		indexList.append(nextIndex)
 		try:
 			if not args.verbose:
-				nextIndex= get_next_index(nextIndex, timestep, colorData)
+				nextIndex= get_next_index(nextIndex, timestep, timeList)
 			else:
-				nextIndex, residual = get_next_index(nextIndex, timestep, colorData, residual=kwargs['residual'])
+				nextIndex, residual = get_next_index(nextIndex, timestep, timeList, residual=kwargs['residual'])
 		except IndexError as err:
 			break
 
@@ -146,32 +153,32 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('fileIn', help='location history CSV file')
 	parser.add_argument('-v', '--verbose', action='store_true', help='displayed time normalization analytics')
-	parser.add_argument('-f', '--fastRender', action='store_true', help='faster rendering, but less accurate time normalization')
-	parser.add_argument('-ts', '--tStep', help='number of frames per day')
+	parser.add_argument('-ts', '--tStep', type=float, help='number of frames per day')
+	
 	requiredNamed = parser.add_argument_group('required named arguments')
 	requiredNamed.add_argument('-t', '--trim', nargs=4, required=True, type=float, help='Trim the output to a box with corners <north border> <west border> <south border> <east border>')
 	
 	args = parser.parse_args()
-
+	
 	# load file in ascending time order, load (n x 1) arrays of lat, lon, and colorbar
 	locHist = np.loadtxt(args.fileIn, delimiter = ',', skiprows=1)[::-1]
 	dateData = locHist[:,1]
 	lat = locHist[:,2]
 	lon = locHist[:,3]
+
 	start_date = get_decimal_year(dateData[0])
-	colorData = ((dateData-dateData[0]))/3.1536E7 + start_date
+	timeList = ((dateData-dateData[0]))/3.1536E7 + start_date
 
 	# organize data into an nx3 array, where each row is timestamped
 	# fourth column is the size column
 	dataArray = np.hstack((
 			lat[:,np.newaxis],
 			lon[:,np.newaxis],
-			colorData[:,np.newaxis],
-			2*np.ones_like(colorData[:,np.newaxis])
+			timeList[:,np.newaxis],
+			2*np.ones_like(timeList[:,np.newaxis])
 		))
-
-	if args.fastRender:
-		dataArray = trim_to_box(dataArray, *args.trim)
+	
+	dataArray = trim_to_box(dataArray, *args.trim)
 
 	# approx. 3 frame per day
 	timestep = 1/(3*365.25)
@@ -181,23 +188,18 @@ if __name__ == '__main__':
 	# each element of frames is the datapoints to make up a given frame
 
 	if not args.verbose:
-		frames, indexList = get_frame_list(dataArray, timestep, colorData)
+		frames, indexList = get_frame_list(dataArray, timestep, timeList)
 	else:
 		residual=[]
-		frames, indexList, residual = get_frame_list(dataArray, timestep, colorData, residual=residual)
-	
+		frames, indexList, residual = get_frame_list(dataArray, timestep, timeList, residual=residual)
 	frames = set_grey_frames(frames, indexList)
-
-	if not args.fastRender:
-		dataArray = trim_to_box(dataArray, *args.trim)
 
 	# plots a historgram of residuals
 
 	if args.verbose:
-		plt.hist(residual, bins=30, range=(1,10))
+		plt.hist(residual, bins=200, range=(1,12000))
 		plt.xlabel('Frame Normalization Factor (>1 means frames are longer than expected)')
-		plt.ylim(0,2500)
-		plt.show()
+		plt.show()	
 
 	np.save('frames', frames)
 	np.save('indexList', indexList)

@@ -104,7 +104,6 @@ if __name__=='__main__':
 	print('frames.npy and indexList.npy successfully loaded and deleted.')
 
 	numFrames = len(frames)
-	timestep = 1/(3*365.25)
 
 	# figure framework, starting with an empty plot
 	ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
