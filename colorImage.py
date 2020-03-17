@@ -40,11 +40,6 @@ def trim_to_box(arr, U,Le, Lo,R):
 
 	# remove nans
 	newArr = newArr[~np.isnan(newArr).any(axis=1)]
-	print(newArr)
-	print(arr[:,1].shape)
-	print(newArr.shape)
-
-	print(np.min(newArr[:,1]))
 
 	return newArr
 
@@ -68,7 +63,7 @@ def main():
 	lon = locHist[:,3]
 
 	ratio = (args.trim[3]-args.trim[1])/(args.trim[0]-args.trim[2])
-	width=30
+	width=100
 	fig = plt.figure(figsize=(width,width/ratio), dpi=100)
 	scat = plt.scatter(lon,lat, c=colorData, s=1, cmap='viridis_r')
 
@@ -76,8 +71,8 @@ def main():
 	#configure figure style, restrict to box
 	plt.xlim(args.trim[1], args.trim[3])
 	plt.ylim(args.trim[2], args.trim[0])
-	plt.clim(colorData[0], colorData[-1])
-	plt.colorbar()
+	#plt.clim(colorData[0], colorData[-1])
+	#plt.colorbar()
 	plt.axis('off')
 
 

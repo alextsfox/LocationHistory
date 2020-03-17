@@ -3,21 +3,24 @@ import sys
 import argparse
 from time import time
 import pandas as pd
-import numpy as np
 
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('jsonIn', help='The filtered .json file')
+parser.add_argument('date', help='File date')
 
 args = parser.parse_args()
 
 dfile = open(args.jsonIn, 'r')
 d = dfile.readlines()
 
-lat = d[2::5]
-lon = d[3::5]
-t = d[4::5]
+lat = d[2::7]
+lon = d[3::7]
+t = d[4::7]
+alt = d[5::7]
+acc = d[6::7]
+
 
 # converts JSON data into organized lists.
 def getVal(data):
@@ -49,15 +52,23 @@ getVal(lat)
 getVal(lon)
 for i in range(len(t)):
 	t[i] = float(t[i][20:33]) * 10**-3
+for i in range(len(alt)):
+	if alt[i][16:-2] != 'null':
+		alt[i] = float(alt[i][16:-2])
+	else:
+		alt[i] = -9999
+for i in range(len(acc)):
+	acc[i] = float(acc[i][16:])
 
 # creating dataframe
 df = pd.DataFrame()
 df['time'] = t
 df['lat'] = lat
 df['lon'] = lon
-df['colorbar'] = [(1000*i)//len(t) for i in range(len(t))]
+df['alt'] = alt
+df['acc'] = acc
 
-csvOut = '/'.join(args.jsonIn.split('/')[:-1]) + '/FilteredLocations'
+csvOut = 'csv-files/FilteredLocations_' + args.date
 
 df.to_csv('{csvOut}_Full.csv'.format(csvOut=csvOut))
 df[::len(df)//5000].to_csv('{csvOut}_005k.csv'.format(csvOut=csvOut))

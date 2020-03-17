@@ -2,23 +2,26 @@
 
 If you have location tracking turned on on your google account, this tool turns data into a nice looking animation. 
 
-**Dependencies:**
+**Bash Dependencies:**
 
     jq   
     ffmpeg
   
 **Python3 dependencies:**
 
-    matplotlib
-    numpy
     pandas
   
+**R dependencies:**  
+
+    tidyverse
+    ggplot2
+    plotly
+
 **To use:**
 1. download your google location history data as a .json archive using takeout.google.com and place the unzipped directory in the working directory.
 2. Change RunTool.sh to point towards the correct files. 
 3. Run the script RunTool.sh:
-      bash RunTool.sh
-4. Wait a while
+4. Open R file, follow instructions.
 
 **Credit**
 
