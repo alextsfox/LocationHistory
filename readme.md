@@ -5,7 +5,6 @@ If you have location tracking turned on on your google account, this tool turns 
 **Bash Dependencies:**
 
     jq   
-    ffmpeg
   
 **Python3 dependencies:**
 
@@ -15,7 +14,6 @@ If you have location tracking turned on on your google account, this tool turns 
 
     tidyverse
     ggplot2
-    plotly
 
 **To use:**
 1. download your google location history data as a .json archive using takeout.google.com and place the unzipped directory in the working directory.
