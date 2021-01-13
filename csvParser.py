@@ -15,15 +15,17 @@ args = parser.parse_args()
 dfile = open(args.jsonIn, 'r')
 d = dfile.readlines()
 
+# columns containing relevant data if the data formatting is screwed up after 
+# this, you may need to open the filtered .json files yourself and find 
+# the correct columns to use
 lat = d[2::7]
 lon = d[3::7]
 t = d[4::7]
 alt = d[5::7]
 acc = d[6::7]
 
-
 # converts JSON data into organized lists.
-def getVal(data):
+def getVal(data): # very fragile, do not mess with this
 	for i in range(len(data)):
 
 		val = ''
@@ -68,9 +70,13 @@ df['lon'] = lon
 df['alt'] = alt
 df['acc'] = acc
 
+print(df)
+
 csvOut = 'csv-files/FilteredLocations_' + args.date
 
 df.to_csv('{csvOut}_Full.csv'.format(csvOut=csvOut))
+
+# optional. Just outputs a smaller dataset.
 df[::len(df)//5000].to_csv('{csvOut}_005k.csv'.format(csvOut=csvOut))
 df[::len(df)//15000].to_csv('{csvOut}_015k.csv'.format(csvOut=csvOut))
 df[::len(df)//100000].to_csv('{csvOut}_100k.csv'.format(csvOut=csvOut))
